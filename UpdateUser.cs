@@ -36,7 +36,7 @@ namespace UpdateUserHttp
 
       var authResult = GetOneAccessToken();
       var graphClient = GetGraphClient(authResult);
-      ChangeGuestUserType(graphClient, log, name);
+      ChangeUserInfo(graphClient, log, name);
 
       return req.CreateResponse(HttpStatusCode.OK, "Finished. ");
         }
@@ -46,7 +46,7 @@ namespace UpdateUserHttp
       string token = "";
       string CLIENT_ID = ConfigurationManager.AppSettings["CLIENT_ID"];
       string CLIENT_SECERET = ConfigurationManager.AppSettings["CLIENT_SECRET"];
-      string TENAT_ID = ""; //ADD
+      string TENANT_ID = ""; //ADD
       string TOKEN_ENDPOINT = "";
       string MS_GRAPH_SCOPE = "";
       string GRANT_TYPE = "";
@@ -54,7 +54,7 @@ namespace UpdateUserHttp
       try
       {
 
-        TOKEN_ENDPOINT = "https://login.microsoftonline.com/" + TENAT_ID + "/oauth2/v2.0/token";
+        TOKEN_ENDPOINT = "https://login.microsoftonline.com/" + TENANT_ID + "/oauth2/v2.0/token";
         MS_GRAPH_SCOPE = "https://graph.microsoft.com/.default";
         GRANT_TYPE = "client_credentials";
 
@@ -116,7 +116,7 @@ namespace UpdateUserHttp
       return graphClient;
     }
 
-    public static async void ChangeGuestUserType(GraphServiceClient graphClient, TraceWriter Log, string name)
+    public static async void ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string name)
     {
       var guestUser = new User
       {
