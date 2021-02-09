@@ -13,6 +13,7 @@ using System.IO;
 using System.Web.Script.Serialization;
 using Microsoft.Graph;
 using System.Net.Http.Headers;
+using System.Collections.Generic;
 
 namespace UpdateUserHttp
 {
@@ -23,20 +24,62 @@ namespace UpdateUserHttp
         {
             log.Info("C# HTTP trigger function processed a request.");
             // parse query parameter
-            string name = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "name", true) == 0)
+            string userID = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "userid", true) == 0)
                 .Value;
 
-            if (name == null)
+            string jobTitle = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "jobtitle", true) == 0)
+                .Value;
+
+            string firstName = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "firstname", true) == 0)
+                .Value;
+
+            string lastName = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "lastname", true) == 0)
+                .Value;
+            string businessPhones = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "businessPhones", true) == 0)
+                .Value;
+            string streetAddress = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "streetAddress", true) == 0)
+                .Value;
+            string department = req.GetQueryNameValuePairs()
+               .FirstOrDefault(q => string.Compare(q.Key, "department", true) == 0)
+               .Value;
+            string city = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "city", true) == 0)
+                .Value;
+            string province = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "province", true) == 0)
+                .Value;
+            string postalcode = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "postalcode", true) == 0)
+                .Value;
+
+
+            if (userID == null)
             {
                 // Get request body
                 dynamic data = await req.Content.ReadAsAsync<object>();
-                name = data?.name;
+                userID = userID ?? data?.userID;
+                jobTitle = jobTitle ?? data?.jobTitle;
+                firstName = firstName ?? data?.firstName;
+                lastName = lastName ?? data?.lastName;
+                businessPhones = businessPhones ?? data?.businessPhones;
+                streetAddress = streetAddress ?? data?.streetAddress;
+                department = department ?? data.department;
+                city = city ?? data.city;
+                province = province ?? data.province;
+                postalcode = postalcode ?? data.postalcode;
+
+
             }
 
-      var authResult = GetOneAccessToken();
-      var graphClient = GetGraphClient(authResult);
-      ChangeUserInfo(graphClient, log, name);
+            var authResult = GetOneAccessToken();
+            var graphClient = GetGraphClient(authResult);
+            ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, businessPhones, streetAddress, department, city, province, postalcode);
 
       return req.CreateResponse(HttpStatusCode.OK, "Finished. ");
         }
@@ -116,16 +159,28 @@ namespace UpdateUserHttp
       return graphClient;
     }
 
-    public static async void ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string name)
+    public static async void ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode)
     {
+
       var guestUser = new User
       {
-          JobTitle = name
+          JobTitle = jobTitle,
+          Surname = lastName,
+          GivenName = firstName,
+          BusinessPhones = new List<String>()
+            {
+                businessPhones
+            },
+          StreetAddress = streetAddress,
+          Department = department,
+          City = city,
+          PostalCode = postalcode,
+          State = province
       };
-            
-       await graphClient.Users[""]  //USER_ID
-       .Request()
-       .UpdateAsync(guestUser);
+
+     await graphClient.Users[userID]  //USER_ID
+     .Request()
+     .UpdateAsync(guestUser);
     }
   }
 }
