@@ -57,7 +57,12 @@ namespace UpdateUserHttp
             string postalcode = req.GetQueryNameValuePairs()
                 .FirstOrDefault(q => string.Compare(q.Key, "postalcode", true) == 0)
                 .Value;
-
+            string mobilePhone = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "mobilephone", true) == 0)
+                .Value;
+            string country = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "country", true) == 0)
+                .Value;
 
             if (userID == null)
             {
@@ -69,17 +74,17 @@ namespace UpdateUserHttp
                 lastName = lastName ?? data?.lastName;
                 businessPhones = businessPhones ?? data?.businessPhones;
                 streetAddress = streetAddress ?? data?.streetAddress;
-                department = department ?? data.department;
-                city = city ?? data.city;
-                province = province ?? data.province;
-                postalcode = postalcode ?? data.postalcode;
-
-
+                department = department ?? data?.department;
+                city = city ?? data?.city;
+                province = province ?? data?.province;
+                postalcode = postalcode ?? data?.postalcode;
+                mobilePhone = mobilePhone ?? data?.mobilePhone;
+                country = country ?? data?.country;
             }
 
             var authResult = GetOneAccessToken();
             var graphClient = GetGraphClient(authResult);
-            ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, businessPhones, streetAddress, department, city, province, postalcode);
+            ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
 
       return req.CreateResponse(HttpStatusCode.OK, "Finished. ");
         }
@@ -159,7 +164,7 @@ namespace UpdateUserHttp
       return graphClient;
     }
 
-    public static async void ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode)
+    public static async void ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
     {
 
       var guestUser = new User
@@ -171,11 +176,14 @@ namespace UpdateUserHttp
             {
                 businessPhones
             },
+          MobilePhone = mobilePhone,
           StreetAddress = streetAddress,
           Department = department,
           City = city,
           PostalCode = postalcode,
-          State = province
+          State = province,
+          Country = country
+
       };
 
      await graphClient.Users[userID]  //USER_ID
