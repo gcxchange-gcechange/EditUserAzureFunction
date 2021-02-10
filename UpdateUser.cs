@@ -64,23 +64,20 @@ namespace UpdateUserHttp
                 .FirstOrDefault(q => string.Compare(q.Key, "country", true) == 0)
                 .Value;
 
-            if (userID == null)
-            {
                 // Get request body
                 dynamic data = await req.Content.ReadAsAsync<object>();
-                userID = userID ?? data?.userID;
-                jobTitle = jobTitle ?? data?.jobTitle;
-                firstName = firstName ?? data?.firstName;
-                lastName = lastName ?? data?.lastName;
-                businessPhones = businessPhones ?? data?.businessPhones;
-                streetAddress = streetAddress ?? data?.streetAddress;
-                department = department ?? data?.department;
-                city = city ?? data?.city;
-                province = province ?? data?.province;
-                postalcode = postalcode ?? data?.postalcode;
-                mobilePhone = mobilePhone ?? data?.mobilePhone;
-                country = country ?? data?.country;
-            }
+                userID = userID ?? data?.user.userID;
+                jobTitle = jobTitle ?? data?.user.jobTitle;
+                firstName = firstName ?? data?.user.firstName;
+                lastName = lastName ?? data?.user.lastName;
+                businessPhones = businessPhones ?? data?.user.businessPhones;
+                streetAddress = streetAddress ?? data?.user.streetAddress;
+                department = department ?? data?.user.department;
+                city = city ?? data?.user.city;
+                province = province ?? data?.user.province;
+                postalcode = postalcode ?? data?.user.postalcode;
+                mobilePhone = mobilePhone ?? data?.user.mobilePhone;
+                country = country ?? data?.user.country;
 
             var authResult = GetOneAccessToken();
             var graphClient = GetGraphClient(authResult);
