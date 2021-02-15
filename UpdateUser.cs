@@ -163,16 +163,26 @@ namespace UpdateUserHttp
 
     public static async void ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
     {
-
+            var BusinessPhones = new List<String>();
+            if (!String.IsNullOrEmpty(businessPhones))
+            {
+             BusinessPhones = new List<String>()
+                {
+                    businessPhones
+                };
+            }
+            else
+            {
+             BusinessPhones = new List<String>()
+                {};
+            }
+        
       var guestUser = new User
       {
           JobTitle = jobTitle,
           Surname = lastName,
           GivenName = firstName,
-          BusinessPhones = new List<String>()
-            {
-                businessPhones
-            },
+          BusinessPhones = BusinessPhones,
           MobilePhone = mobilePhone,
           StreetAddress = streetAddress,
           Department = department,
