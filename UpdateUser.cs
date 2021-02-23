@@ -175,7 +175,7 @@ namespace UpdateUserHttp
       return graphClient;
     }
 
-    public static async void ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
+    public static async Task<object> ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
     {
             var BusinessPhones = new List<String>();
             if (!String.IsNullOrEmpty(businessPhones))
@@ -207,7 +207,7 @@ namespace UpdateUserHttp
 
       };
 
-     await graphClient.Users[userID]  //USER_ID
+     return await graphClient.Users[userID]  //USER_ID
      .Request()
      .UpdateAsync(guestUser);
     }
