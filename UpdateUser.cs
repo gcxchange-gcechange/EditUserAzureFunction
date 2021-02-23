@@ -85,7 +85,7 @@ namespace UpdateUserHttp
 
             var authResult = GetOneAccessToken();
             var graphClient = GetGraphClient(authResult);
-            ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, displayName businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
+            ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
 
       return req.CreateResponse(HttpStatusCode.OK, "Finished. ");
         }
