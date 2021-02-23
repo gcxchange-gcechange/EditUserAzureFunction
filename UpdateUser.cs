@@ -39,6 +39,9 @@ namespace UpdateUserHttp
             string lastName = req.GetQueryNameValuePairs()
                 .FirstOrDefault(q => string.Compare(q.Key, "lastname", true) == 0)
                 .Value;
+            string displayName = req.GetQueryNameValuePairs()
+                .FirstOrDefault(q => string.Compare(q.Key, "displayName", true) == 0)
+                .Value;
             string businessPhones = req.GetQueryNameValuePairs()
                 .FirstOrDefault(q => string.Compare(q.Key, "businessPhones", true) == 0)
                 .Value;
@@ -70,6 +73,7 @@ namespace UpdateUserHttp
                 jobTitle = jobTitle ?? data?.user.jobTitle;
                 firstName = firstName ?? data?.user.firstName;
                 lastName = lastName ?? data?.user.lastName;
+                displayName = displayName ?? data?.user.displayName;
                 businessPhones = businessPhones ?? data?.user.businessPhones;
                 streetAddress = streetAddress ?? data?.user.streetAddress;
                 department = department ?? data?.user.department;
@@ -81,7 +85,7 @@ namespace UpdateUserHttp
 
             var authResult = GetOneAccessToken();
             var graphClient = GetGraphClient(authResult);
-            ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
+            ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, displayName businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
 
       return req.CreateResponse(HttpStatusCode.OK, "Finished. ");
         }
@@ -161,7 +165,7 @@ namespace UpdateUserHttp
       return graphClient;
     }
 
-    public static async void ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
+    public static async void ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string displayName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
     {
             var BusinessPhones = new List<String>();
             if (!String.IsNullOrEmpty(businessPhones))
@@ -182,6 +186,7 @@ namespace UpdateUserHttp
           JobTitle = jobTitle,
           Surname = lastName,
           GivenName = firstName,
+          DisplayName = displayName,
           BusinessPhones = BusinessPhones,
           MobilePhone = mobilePhone,
           StreetAddress = streetAddress,
