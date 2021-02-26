@@ -17,7 +17,7 @@ namespace UpdateUserHttp.Tests
             await LocalSettings.SetupEnvironment();
 
             // Create HttpRequestMessage
-            var data = "{\"user\": { \"userID\": \"038306da-64ae-4aa1-bef1-1f42cd2bd7eb\" } }";
+            var data = "{\"user\": { \"userID\": \"679b3ae7-2a36-4bd3-8c50-672ab22f88ca\" } }";
             var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/");
             request.Content = new StringContent(data, Encoding.UTF8, "application/json");
             var httpConfig = new HttpConfiguration();
