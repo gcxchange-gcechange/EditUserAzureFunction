@@ -212,9 +212,16 @@ namespace UpdateUserHttp
 
       };
 
-     return await graphClient.Users[userID]  //USER_ID
-     .Request()
-     .UpdateAsync(guestUser);
+        try
+        {
+            return await graphClient.Users[userID]  //USER_ID
+                .Request()
+                .UpdateAsync(guestUser);
+        }
+        catch (ServiceException e)
+        {
+            return e;
+        }
     }
   }
 }
