@@ -85,23 +85,21 @@ namespace UpdateUserHttp
 
             // Check if userID is passed
             // return BadRequest if not present
-            if (userID != null)
-            {
-                var authResult = GetOneAccessToken();
-                var graphClient = GetGraphClient(authResult);
-                var result = ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
-
-                if (result.Result == null)
-                {
-                    return req.CreateResponse(HttpStatusCode.OK, "Finished");
-                } else
-                {
-                    return req.CreateResponse(HttpStatusCode.BadRequest, "E1BadRequest");
-                }
-            } else
+            if (userID == null)
             {
                 return req.CreateResponse(HttpStatusCode.BadRequest, "E0NoUserID");
             }
+
+            var authResult = GetOneAccessToken();
+            var graphClient = GetGraphClient(authResult);
+            var result = ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
+
+            if (result.Result != null)
+            {
+                return req.CreateResponse(HttpStatusCode.BadRequest, "E1BadRequest");
+            }
+
+            return req.CreateResponse(HttpStatusCode.OK, "Finished");
         }
 
     public static string GetOneAccessToken()
