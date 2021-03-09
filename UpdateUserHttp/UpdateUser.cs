@@ -25,6 +25,8 @@ namespace UpdateUserHttp
 
     public static class UpdateUser
     {
+      private static IGraphClientWrapper _graphClientWrapper;
+
         [FunctionName("UpdateUser")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
@@ -96,9 +98,13 @@ namespace UpdateUserHttp
                 return req.CreateResponse(HttpStatusCode.BadRequest, "E0NoUserID");
             }
 
-            var authResult = GetOneAccessToken();
-            IGraphClientWrapper graphClient = new GraphClientWrapper(GetGraphClient(authResult));
-            var result = ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
+            if (_graphClientWrapper == null)
+            {
+              var authResult = GetOneAccessToken();
+              _graphClientWrapper = new GraphClientWrapper(GetGraphClient(authResult));
+            }
+
+            var result = ChangeUserInfo(_graphClientWrapper, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
 
             if (result.Result != null)
             {
