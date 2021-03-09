@@ -17,6 +17,12 @@ using System.Collections.Generic;
 
 namespace UpdateUserHttp
 {
+
+  public interface IGraphClientWrapper
+  {
+    System.Threading.Tasks.Task<Microsoft.Graph.User> updateUser( String userID, User guestUser );
+  }
+
     public static class UpdateUser
     {
         [FunctionName("UpdateUser")]
@@ -91,7 +97,7 @@ namespace UpdateUserHttp
             }
 
             var authResult = GetOneAccessToken();
-            var graphClient = GetGraphClient(authResult);
+            IGraphClientWrapper graphClient = new GraphClientWrapper(GetGraphClient(authResult));
             var result = ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
 
             if (result.Result != null)
@@ -101,6 +107,23 @@ namespace UpdateUserHttp
 
             return req.CreateResponse(HttpStatusCode.OK, "Finished");
         }
+
+    private class GraphClientWrapper : IGraphClientWrapper
+    {
+      private readonly GraphServiceClient _graphClient;
+
+      public GraphClientWrapper( GraphServiceClient graphClient )
+      {
+        _graphClient = graphClient;
+      }
+
+      public async System.Threading.Tasks.Task<Microsoft.Graph.User> updateUser( String userID, User guestUser )
+      {
+        return await _graphClient.Users[userID]
+                  .Request()
+                  .UpdateAsync(guestUser);
+      }
+    }
 
     public static string GetOneAccessToken()
     {
@@ -177,7 +200,7 @@ namespace UpdateUserHttp
       return graphClient;
     }
 
-    public static async Task<object> ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string displayName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
+    public static async Task<object> ChangeUserInfo(IGraphClientWrapper graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string displayName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
     {
             var BusinessPhones = new List<String>();
             if (!String.IsNullOrEmpty(businessPhones))
@@ -212,9 +235,7 @@ namespace UpdateUserHttp
 
         try
         {
-            return await graphClient.Users[userID]  //USER_ID
-                .Request()
-                .UpdateAsync(guestUser);
+            return await graphClient.updateUser( userID, guestUser );
         }
         catch (ServiceException e)
         {
