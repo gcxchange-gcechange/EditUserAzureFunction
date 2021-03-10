@@ -20,12 +20,28 @@ namespace UpdateUserHttp
 
   public interface IGraphClientWrapper
   {
-    System.Threading.Tasks.Task<Microsoft.Graph.User> updateUser( String userID, User guestUser );
+    Task<object> updateUser( String userID, User guestUser );
+  }
+  
+  public class GraphClientMock : IGraphClientWrapper
+  {
+      private readonly String _result;
+
+      public GraphClientMock( String result )
+      {
+          _result = result;
+      }
+
+      public async Task<object> updateUser( String userID, User guestUser )
+      {
+          var mockResult = Task<object>.Run( () => {return _result;} );
+          return await mockResult;
+      }
   }
 
     public static class UpdateUser
     {
-      private static IGraphClientWrapper _graphClientWrapper;
+      public static IGraphClientWrapper _graphClientWrapper;
 
         [FunctionName("UpdateUser")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
@@ -123,7 +139,7 @@ namespace UpdateUserHttp
         _graphClient = graphClient;
       }
 
-      public async System.Threading.Tasks.Task<Microsoft.Graph.User> updateUser( String userID, User guestUser )
+      public async Task<object> updateUser( String userID, User guestUser )
       {
         return await _graphClient.Users[userID]
                   .Request()

@@ -23,6 +23,7 @@ namespace UpdateUserHttp.Tests
             var httpConfig = new HttpConfiguration();
             request.SetConfiguration(httpConfig);
 
+            UpdateUser._graphClientWrapper = new GraphClientMock(null);
             var result = await UpdateUser.Run(req: request, log: log);
             Assert.AreEqual("\"Finished\"", result.Content.ReadAsStringAsync().Result);
         }
@@ -37,6 +38,7 @@ namespace UpdateUserHttp.Tests
             var httpConfig = new HttpConfiguration();
             request.SetConfiguration(httpConfig);
 
+            UpdateUser._graphClientWrapper = new GraphClientMock("No User ID");
             var result = await UpdateUser.Run(req: request, log: log);
             Assert.AreEqual("\"E0NoUserID\"", result.Content.ReadAsStringAsync().Result);
         }
@@ -54,6 +56,7 @@ namespace UpdateUserHttp.Tests
             var httpConfig = new HttpConfiguration();
             request.SetConfiguration(httpConfig);
 
+            UpdateUser._graphClientWrapper = new GraphClientMock("Invalid ID");
             var result = await UpdateUser.Run(req: request, log: log);
             Assert.AreEqual("\"E1BadRequest\"", result.Content.ReadAsStringAsync().Result);
         }
