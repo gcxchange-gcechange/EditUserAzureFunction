@@ -109,7 +109,7 @@ namespace UpdateUserHttp
 
             // Check if userID is passed
             // return BadRequest if not present
-            if (userID == null)
+            if (String.IsNullOrEmpty(userID))
             {
                 return req.CreateResponse(HttpStatusCode.BadRequest, "E0NoUserID");
             }
