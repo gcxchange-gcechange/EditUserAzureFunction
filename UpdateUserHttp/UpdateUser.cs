@@ -17,8 +17,32 @@ using System.Collections.Generic;
 
 namespace UpdateUserHttp
 {
+
+  public interface IGraphClientWrapper
+  {
+    Task<object> updateUser( String userID, User guestUser );
+  }
+  
+  public class GraphClientMock : IGraphClientWrapper
+  {
+      private readonly String _result;
+
+      public GraphClientMock( String result )
+      {
+          _result = result;
+      }
+
+      public async Task<object> updateUser( String userID, User guestUser )
+      {
+          var mockResult = Task<object>.Run( () => {return _result;} );
+          return await mockResult;
+      }
+  }
+
     public static class UpdateUser
     {
+      public static IGraphClientWrapper _graphClientWrapper;
+
         [FunctionName("UpdateUser")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
@@ -85,24 +109,43 @@ namespace UpdateUserHttp
 
             // Check if userID is passed
             // return BadRequest if not present
-            if (userID != null)
-            {
-                var authResult = GetOneAccessToken();
-                var graphClient = GetGraphClient(authResult);
-                var result = ChangeUserInfo(graphClient, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
-
-                if (result.Result == null)
-                {
-                    return req.CreateResponse(HttpStatusCode.OK, "Finished");
-                } else
-                {
-                    return req.CreateResponse(HttpStatusCode.BadRequest, "E1BadRequest");
-                }
-            } else
+            if (String.IsNullOrEmpty(userID))
             {
                 return req.CreateResponse(HttpStatusCode.BadRequest, "E0NoUserID");
             }
+
+            if (_graphClientWrapper == null)
+            {
+              var authResult = GetOneAccessToken();
+              _graphClientWrapper = new GraphClientWrapper(GetGraphClient(authResult));
+            }
+
+            var result = ChangeUserInfo(_graphClientWrapper, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
+
+            if (result.Result != null)
+            {
+                return req.CreateResponse(HttpStatusCode.BadRequest, "E1BadRequest");
+            }
+
+            return req.CreateResponse(HttpStatusCode.OK, "Finished");
         }
+
+    private class GraphClientWrapper : IGraphClientWrapper
+    {
+      private readonly GraphServiceClient _graphClient;
+
+      public GraphClientWrapper( GraphServiceClient graphClient )
+      {
+        _graphClient = graphClient;
+      }
+
+      public async Task<object> updateUser( String userID, User guestUser )
+      {
+        return await _graphClient.Users[userID]
+                  .Request()
+                  .UpdateAsync(guestUser);
+      }
+    }
 
     public static string GetOneAccessToken()
     {
@@ -179,7 +222,7 @@ namespace UpdateUserHttp
       return graphClient;
     }
 
-    public static async Task<object> ChangeUserInfo(GraphServiceClient graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string displayName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
+    public static async Task<object> ChangeUserInfo(IGraphClientWrapper graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string displayName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
     {
             var BusinessPhones = new List<String>();
             if (!String.IsNullOrEmpty(businessPhones))
@@ -214,9 +257,7 @@ namespace UpdateUserHttp
 
         try
         {
-            return await graphClient.Users[userID]  //USER_ID
-                .Request()
-                .UpdateAsync(guestUser);
+            return await graphClient.updateUser( userID, guestUser );
         }
         catch (ServiceException e)
         {
