@@ -114,15 +114,11 @@ namespace UpdateUserHttp
                 return req.CreateResponse(HttpStatusCode.BadRequest, "E0NoUserID");
             }
 
-            if (_graphClientWrapper == null)
-            {
-              var authResult = GetOneAccessToken();
-              _graphClientWrapper = new GraphClientWrapper(GetGraphClient(authResult));
-            }
+            graphClientWrapper = new GraphClientWrapper(GetGraphClient(GetOneAccessToken()));
 
             try
             {
-              ChangeUserInfo(_graphClientWrapper, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
+              ChangeUserInfo(graphClientWrapper, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
             }
             catch( ServiceException e )
             {
