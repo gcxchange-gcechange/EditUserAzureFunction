@@ -120,9 +120,11 @@ namespace UpdateUserHttp
               _graphClientWrapper = new GraphClientWrapper(GetGraphClient(authResult));
             }
 
-            var result = ChangeUserInfo(_graphClientWrapper, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
-
-            if (result.Result != null)
+            try
+            {
+              ChangeUserInfo(_graphClientWrapper, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
+            }
+            catch( ServiceException e )
             {
                 return req.CreateResponse(HttpStatusCode.BadRequest, "E1BadRequest");
             }
@@ -222,21 +224,21 @@ namespace UpdateUserHttp
       return graphClient;
     }
 
-    public static async Task<object> ChangeUserInfo(IGraphClientWrapper graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string displayName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
+    public static Task<object> ChangeUserInfo(IGraphClientWrapper graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string displayName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
     {
-            var BusinessPhones = new List<String>();
-            if (!String.IsNullOrEmpty(businessPhones))
-            {
-             BusinessPhones = new List<String>()
-                {
-                    businessPhones
-                };
-            }
-            else
-            {
-             BusinessPhones = new List<String>()
-                {};
-            }
+      var BusinessPhones = new List<String>();
+      if (!String.IsNullOrEmpty(businessPhones))
+      {
+        BusinessPhones = new List<String>()
+          {
+              businessPhones
+          };
+      }
+      else
+      {
+        BusinessPhones = new List<String>()
+          {};
+      }
         
       var guestUser = new User
       {
@@ -255,14 +257,16 @@ namespace UpdateUserHttp
 
       };
 
-        try
-        {
-            return await graphClient.updateUser( userID, guestUser );
-        }
-        catch (ServiceException e)
-        {
-            return e;
-        }
+      var result = graphClient.updateUser( userID, guestUser );
+
+      if( result.Result != null )
+      {
+        Error err = new Error();
+        err.Message = (String)result.Result;
+        throw new ServiceException(err);
+      }
+ 
+      return result;
     }
   }
 }
