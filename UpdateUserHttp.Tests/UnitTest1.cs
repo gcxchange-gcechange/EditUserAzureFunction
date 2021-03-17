@@ -22,6 +22,7 @@ namespace UpdateUserHttp.Tests
             Assert.AreEqual(null, result.Result);
         }
 
+        // Run() tests - expect to stop before they require api client
         [TestMethod]
         public async Task Request_Query_Without_UserID()
         {
@@ -47,6 +48,47 @@ namespace UpdateUserHttp.Tests
 
             var result = await UpdateUser.Run(req: request, log: log);
             Assert.AreEqual("\"E0NoUserID\"", result.Content.ReadAsStringAsync().Result);
+        }
+
+        [TestMethod]
+        public async Task ExtractHttpData_Query_Without_UserID()
+        {
+            // Create HttpRequestMessage
+            var data = "{\"user\": {  } }";
+            var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/");
+            request.Content = new StringContent(data, Encoding.UTF8, "application/json");
+            var httpConfig = new HttpConfiguration();
+            request.SetConfiguration(httpConfig);
+
+            string errorMessage = "";
+            try{
+                var result = await UpdateUser.ExtractHttpData(req: request, log: log);
+            }
+            catch(HttpRequestException e)
+            {
+                errorMessage = e.Message;
+            }
+            Assert.AreEqual("E0NoUserID", errorMessage);
+        }
+        [TestMethod]
+        public async Task ExtractHttpData_Query_With_empty_UserID()
+        {
+            // Create HttpRequestMessage
+            var data = "{\"user\": { \"userID\": \"\" } }";
+            var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/");
+            request.Content = new StringContent(data, Encoding.UTF8, "application/json");
+            var httpConfig = new HttpConfiguration();
+            request.SetConfiguration(httpConfig);
+
+            string errorMessage = "";
+            try{
+                var result = await UpdateUser.ExtractHttpData(req: request, log: log);
+            }
+            catch(HttpRequestException e)
+            {
+                errorMessage = e.Message;
+            }
+            Assert.AreEqual("E0NoUserID", errorMessage);
         }
 
         [TestMethod]
