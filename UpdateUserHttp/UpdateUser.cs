@@ -41,94 +41,36 @@ namespace UpdateUserHttp
 
     public static class UpdateUser
     {
-      public static IGraphClientWrapper _graphClientWrapper;
 
-        [FunctionName("UpdateUser")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
+      [FunctionName("UpdateUser")]
+      public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
+      {
+        log.Info("C# HTTP trigger function processed a request.");
+        
+        Dictionary<string,string> httpData = new Dictionary<string,string>();
+
+        try
         {
-            log.Info("C# HTTP trigger function processed a request.");
-            // parse query parameter
-            string userID = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "userid", true) == 0)
-                .Value;
-
-            string jobTitle = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "jobtitle", true) == 0)
-                .Value;
-
-            string firstName = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "firstname", true) == 0)
-                .Value;
-
-            string lastName = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "lastname", true) == 0)
-                .Value;
-            string displayName = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "displayName", true) == 0)
-                .Value;
-            string businessPhones = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "businessPhones", true) == 0)
-                .Value;
-            string streetAddress = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "streetAddress", true) == 0)
-                .Value;
-            string department = req.GetQueryNameValuePairs()
-               .FirstOrDefault(q => string.Compare(q.Key, "department", true) == 0)
-               .Value;
-            string city = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "city", true) == 0)
-                .Value;
-            string province = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "province", true) == 0)
-                .Value;
-            string postalcode = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "postalcode", true) == 0)
-                .Value;
-            string mobilePhone = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "mobilephone", true) == 0)
-                .Value;
-            string country = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "country", true) == 0)
-                .Value;
-
-                // Get request body
-                dynamic data = await req.Content.ReadAsAsync<object>();
-                userID = userID ?? data?.user.userID;
-                jobTitle = jobTitle ?? data?.user.jobTitle;
-                firstName = firstName ?? data?.user.firstName;
-                lastName = lastName ?? data?.user.lastName;
-                displayName = displayName ?? data?.user.displayName;
-                businessPhones = businessPhones ?? data?.user.businessPhones;
-                streetAddress = streetAddress ?? data?.user.streetAddress;
-                department = department ?? data?.user.department;
-                city = city ?? data?.user.city;
-                province = province ?? data?.user.province;
-                postalcode = postalcode ?? data?.user.postalcode;
-                mobilePhone = mobilePhone ?? data?.user.mobilePhone;
-                country = country ?? data?.user.country;
-
-            // Check if userID is passed
-            // return BadRequest if not present
-            if (String.IsNullOrEmpty(userID))
-            {
-                return req.CreateResponse(HttpStatusCode.BadRequest, "E0NoUserID");
-            }
-
-            if (_graphClientWrapper == null)
-            {
-              var authResult = GetOneAccessToken();
-              _graphClientWrapper = new GraphClientWrapper(GetGraphClient(authResult));
-            }
-
-            var result = ChangeUserInfo(_graphClientWrapper, log, userID, jobTitle, firstName, lastName, displayName, businessPhones, streetAddress, department, city, province, postalcode, mobilePhone, country);
-
-            if (result.Result != null)
-            {
-                return req.CreateResponse(HttpStatusCode.BadRequest, "E1BadRequest");
-            }
-
-            return req.CreateResponse(HttpStatusCode.OK, "Finished");
+          httpData = await ExtractHttpData(req, log);
         }
+        catch (HttpRequestException e)
+        {
+          return req.CreateResponse(HttpStatusCode.BadRequest, "E0NoUserID");
+        }
+
+        try
+        {
+          await ChangeUserInfo(new GraphClientWrapper(GetGraphClient(GetOneAccessToken())), log, httpData["userID"], httpData["jobTitle"], httpData["firstName"], httpData["lastName"], 
+            httpData["displayName"], httpData["businessPhones"], httpData["streetAddress"], httpData["department"], httpData["city"], 
+            httpData["province"], httpData["postalcode"], httpData["mobilePhone"], httpData["country"]);
+        }
+        catch( ServiceException e )
+        {
+            return req.CreateResponse(HttpStatusCode.BadRequest, "E1BadRequest");
+        }
+
+        return req.CreateResponse(HttpStatusCode.OK, "Finished");
+      }
 
     private class GraphClientWrapper : IGraphClientWrapper
     {
@@ -145,6 +87,89 @@ namespace UpdateUserHttp
                   .Request()
                   .UpdateAsync(guestUser);
       }
+    }
+
+    public static async Task<Dictionary<string,string>> ExtractHttpData(HttpRequestMessage req, TraceWriter log)
+    {
+      Dictionary<string,string> httpData = new Dictionary<string,string>();
+
+      // parse query parameter
+      string userID = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "userid", true) == 0)
+          .Value;
+      string jobTitle = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "jobtitle", true) == 0)
+          .Value;
+      string firstName = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "firstname", true) == 0)
+          .Value;
+      string lastName = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "lastname", true) == 0)
+          .Value;
+      string displayName = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "displayName", true) == 0)
+          .Value;
+      string businessPhones = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "businessPhones", true) == 0)
+          .Value;
+      string streetAddress = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "streetAddress", true) == 0)
+          .Value;
+      string department = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "department", true) == 0)
+          .Value;
+      string city = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "city", true) == 0)
+          .Value;
+      string province = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "province", true) == 0)
+          .Value;
+      string postalcode = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "postalcode", true) == 0)
+          .Value;
+      string mobilePhone = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "mobilephone", true) == 0)
+          .Value;
+      string country = req.GetQueryNameValuePairs()
+          .FirstOrDefault(q => string.Compare(q.Key, "country", true) == 0)
+          .Value;
+
+      // Get request body
+      dynamic data = await req.Content.ReadAsAsync<object>();
+      userID = userID ?? data?.user.userID;
+      jobTitle = jobTitle ?? data?.user.jobTitle;
+      firstName = firstName ?? data?.user.firstName;
+      lastName = lastName ?? data?.user.lastName;
+      displayName = displayName ?? data?.user.displayName;
+      businessPhones = businessPhones ?? data?.user.businessPhones;
+      streetAddress = streetAddress ?? data?.user.streetAddress;
+      department = department ?? data?.user.department;
+      city = city ?? data?.user.city;
+      province = province ?? data?.user.province;
+      postalcode = postalcode ?? data?.user.postalcode;
+      mobilePhone = mobilePhone ?? data?.user.mobilePhone;
+      country = country ?? data?.user.country;
+
+      if (String.IsNullOrEmpty(userID))
+      {
+        throw new HttpRequestException("E0NoUserID");
+      }
+
+      httpData.Add("userID", userID);
+      httpData.Add("jobTitle", jobTitle);
+      httpData.Add("firstName", firstName);
+      httpData.Add("lastName", lastName);
+      httpData.Add("displayName", displayName);
+      httpData.Add("businessPhones", businessPhones);
+      httpData.Add("streetAddress", streetAddress);
+      httpData.Add("department", department);
+      httpData.Add("city", city);
+      httpData.Add("province", province);
+      httpData.Add("postalcode", postalcode);
+      httpData.Add("mobilePhone", mobilePhone);
+      httpData.Add("country", country);
+
+      return httpData;
     }
 
     public static string GetOneAccessToken()
@@ -222,21 +247,21 @@ namespace UpdateUserHttp
       return graphClient;
     }
 
-    public static async Task<object> ChangeUserInfo(IGraphClientWrapper graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string displayName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
+    public static Task<object> ChangeUserInfo(IGraphClientWrapper graphClient, TraceWriter Log, string userID, string jobTitle, string firstName, string lastName, string displayName, string businessPhones, string streetAddress, string department, string city, string province, string postalcode,string mobilePhone, string country)
     {
-            var BusinessPhones = new List<String>();
-            if (!String.IsNullOrEmpty(businessPhones))
-            {
-             BusinessPhones = new List<String>()
-                {
-                    businessPhones
-                };
-            }
-            else
-            {
-             BusinessPhones = new List<String>()
-                {};
-            }
+      var BusinessPhones = new List<String>();
+      if (!String.IsNullOrEmpty(businessPhones))
+      {
+        BusinessPhones = new List<String>()
+          {
+              businessPhones
+          };
+      }
+      else
+      {
+        BusinessPhones = new List<String>()
+          {};
+      }
         
       var guestUser = new User
       {
@@ -255,14 +280,16 @@ namespace UpdateUserHttp
 
       };
 
-        try
-        {
-            return await graphClient.updateUser( userID, guestUser );
-        }
-        catch (ServiceException e)
-        {
-            return e;
-        }
+      var result = graphClient.updateUser( userID, guestUser );
+
+      if( result.Result != null )
+      {
+        Error err = new Error();
+        err.Message = (String)result.Result;
+        throw new ServiceException(err);
+      }
+ 
+      return result;
     }
   }
 }
