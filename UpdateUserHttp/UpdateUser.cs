@@ -177,7 +177,7 @@ namespace UpdateUserHttp
       string token = "";
       string CLIENT_ID = ConfigurationManager.AppSettings["CLIENT_ID"];
       string CLIENT_SECERET = ConfigurationManager.AppSettings["CLIENT_SECRET"];
-      string TENANT_ID = ""; //ADD
+      string TENANT_ID = ConfigurationManager.AppSettings["TENANT_ID"];
       string TOKEN_ENDPOINT = "";
       string MS_GRAPH_SCOPE = "";
       string GRANT_TYPE = "";
