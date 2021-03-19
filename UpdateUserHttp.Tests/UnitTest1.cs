@@ -140,7 +140,19 @@ namespace UpdateUserHttp.Tests
                 errorMessage = e.Message;
             }
             Assert.AreEqual("", errorMessage);
-            Assert.AreEqual(expectedData, result);
+            Assert.AreEqual(expectedData["userID"], result["userID"]);
+            Assert.AreEqual(expectedData["jobTitle"], result["jobTitle"]);
+            Assert.AreEqual(expectedData["firstName"], result["firstName"]);
+            Assert.AreEqual(expectedData["lastName"], result["lastName"]);
+            Assert.AreEqual(expectedData["displayName"], result["displayName"]);
+            Assert.AreEqual(expectedData["businessPhones"], result["businessPhones"]);
+            Assert.AreEqual(expectedData["streetAddress"], result["streetAddress"]);
+            Assert.AreEqual(expectedData["department"], result["department"]);
+            Assert.AreEqual(expectedData["city"], result["city"]);
+            Assert.AreEqual(expectedData["province"], result["province"]);
+            Assert.AreEqual(expectedData["postalcode"], result["postalcode"]);
+            Assert.AreEqual(expectedData["mobilePhone"], result["mobilePhone"]);
+            Assert.AreEqual(expectedData["country"], result["country"]);
         }
 
         [TestMethod]
