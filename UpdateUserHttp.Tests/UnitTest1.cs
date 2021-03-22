@@ -5,6 +5,7 @@ using System;
 using System.Net.Http;
 using System.Web.Http;
 using Microsoft.Azure.WebJobs.Host;
+using System.Collections.Generic;
 
 namespace UpdateUserHttp.Tests
 {
@@ -89,6 +90,69 @@ namespace UpdateUserHttp.Tests
                 errorMessage = e.Message;
             }
             Assert.AreEqual("E0NoUserID", errorMessage);
+        }
+        [TestMethod]
+        public async Task ExtractHttpData_Query_With_All_Parameters()
+        {
+            Dictionary<string,string> expectedData = new Dictionary<string,string>();
+            expectedData.Add("userID", "679b3ae7-2a36-4bd3-8c50-672ab22f88ca");
+            expectedData.Add("jobTitle", "Unit Test");
+            expectedData.Add("firstName", "Foo");
+            expectedData.Add("lastName", "Bar");
+            expectedData.Add("displayName", "Foo Bar");
+            expectedData.Add("businessPhones", "123-456-7890");
+            expectedData.Add("streetAddress", "0 North Pole");
+            expectedData.Add("department", "Testing");
+            expectedData.Add("city", "Santa's Workshop");
+            expectedData.Add("province", "Santa's");
+            expectedData.Add("postalcode", "HOH OHO");
+            expectedData.Add("mobilePhone", "012-345-6789");
+            expectedData.Add("country", "North Pole");
+            
+            // Create HttpRequestMessage
+            var data = $@"{{""user"": {{""userID"": ""{expectedData["userID"]}"",
+                        ""jobTitle"": ""{expectedData["jobTitle"]}"",
+                        ""firstName"": ""{expectedData["firstName"]}"",
+                        ""lastName"": ""{expectedData["lastName"]}"",
+                        ""displayName"": ""{expectedData["displayName"]}"",
+                        ""businessPhones"": ""{expectedData["businessPhones"]}"",
+                        ""streetAddress"": ""{expectedData["streetAddress"]}"",
+                        ""department"": ""{expectedData["department"]}"",
+                        ""city"": ""{expectedData["city"]}"",
+                        ""province"": ""{expectedData["province"]}"",
+                        ""postalcode"": ""{expectedData["postalcode"]}"",
+                        ""mobilePhone"": ""{expectedData["mobilePhone"]}"",
+                        ""country"": ""{expectedData["country"]}"",
+                        }} }}";
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/");
+            request.Content = new StringContent(data, Encoding.UTF8, "application/json");
+            var httpConfig = new HttpConfiguration();
+            request.SetConfiguration(httpConfig);
+
+            string errorMessage = "";
+            Dictionary<string,string> result = new Dictionary<string,string>();
+            try{
+                result = await UpdateUser.ExtractHttpData(req: request, log: log);
+            }
+            catch(HttpRequestException e)
+            {
+                errorMessage = e.Message;
+            }
+            Assert.AreEqual("", errorMessage);
+            Assert.AreEqual(expectedData["userID"], result["userID"]);
+            Assert.AreEqual(expectedData["jobTitle"], result["jobTitle"]);
+            Assert.AreEqual(expectedData["firstName"], result["firstName"]);
+            Assert.AreEqual(expectedData["lastName"], result["lastName"]);
+            Assert.AreEqual(expectedData["displayName"], result["displayName"]);
+            Assert.AreEqual(expectedData["businessPhones"], result["businessPhones"]);
+            Assert.AreEqual(expectedData["streetAddress"], result["streetAddress"]);
+            Assert.AreEqual(expectedData["department"], result["department"]);
+            Assert.AreEqual(expectedData["city"], result["city"]);
+            Assert.AreEqual(expectedData["province"], result["province"]);
+            Assert.AreEqual(expectedData["postalcode"], result["postalcode"]);
+            Assert.AreEqual(expectedData["mobilePhone"], result["mobilePhone"]);
+            Assert.AreEqual(expectedData["country"], result["country"]);
         }
 
         [TestMethod]
