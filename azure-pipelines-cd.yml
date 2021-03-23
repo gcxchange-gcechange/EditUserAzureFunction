@@ -10,9 +10,6 @@ trigger:
 pr: none
 
 variables:
-  # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: ${AZURE_SUBSCRIPTION}
-
   # Function app name
   functionAppName: 'phaas'
 
@@ -73,7 +70,7 @@ stages:
           - task: AzureFunctionApp@1
             displayName: 'Azure functions app deploy'
             inputs:
-              azureSubscription: '$(azureSubscription)'
+              azureSubscription: '${AZURE_SUBSCRIPTION}'
               appType: functionApp
               appName: $(functionAppName)
               package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
