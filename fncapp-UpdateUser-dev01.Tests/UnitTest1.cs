@@ -4,10 +4,9 @@ using System.Text;
 using System;
 using System.Net.Http;
 using System.Web.Http;
-using Microsoft.Azure.WebJobs.Host;
 using System.Collections.Generic;
 
-namespace UpdateUserHttp.Tests
+namespace fncappUpdateUserdev01.Tests
 {
     [TestClass]
     public class UnitTest1 : TestHelpers.FunctionTest

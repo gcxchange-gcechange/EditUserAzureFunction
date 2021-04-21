@@ -5,7 +5,7 @@ using System.IO;
 using System.Configuration;
 using Newtonsoft.Json;
 
-namespace UpdateUserHttp.Tests
+namespace fncappUpdateUserdev01.Tests
 {
     class LocalSettings
     {
@@ -17,7 +17,7 @@ namespace UpdateUserHttp.Tests
         {
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
-            string basePath = Path.GetFullPath(@"..\..\..\UpdateUserHttp");
+            string basePath = Path.GetFullPath(@"..\..\..\fncapp-UpdateUser-dev01");
             try
             {
                 var settings = JsonConvert.DeserializeObject<LocalSettings>(
