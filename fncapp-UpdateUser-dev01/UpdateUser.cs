@@ -15,7 +15,7 @@ using Microsoft.Graph;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
 
-namespace UpdateUserHttp
+namespace fncappUpdateUserdev01
 {
 
   public interface IGraphClientWrapper
