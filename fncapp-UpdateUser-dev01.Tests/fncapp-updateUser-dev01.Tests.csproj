@@ -234,7 +234,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UpdateUserHttp\UpdateUserHttp.csproj">
+    <ProjectReference Include="..\fncapp-UpdateUser-dev01\fncapp-UpdateUser-dev01.csproj">
       <Project>{5d8f59c6-51bc-48bf-92b7-4ef0d25b2e25}</Project>
       <Name>UpdateUserHttp</Name>
     </ProjectReference>
